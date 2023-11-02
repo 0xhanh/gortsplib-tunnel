@@ -50,8 +50,6 @@ func (r *clientReader) runInner() error {
 	for {
 		what, err := r.c.conn.Read()
 
-		// fmt.Printf(">>> Response: %+v \n", what)
-
 		if err != nil {
 			return err
 		}

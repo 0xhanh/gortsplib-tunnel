@@ -1,5 +1,3 @@
-github.com/bluenviron/gortsplib/v4 v4.3.0 h1:wYtXickYP9zkCxbBIt2WEseQPX0wROB+K0DAew4Ls7g=
-github.com/bluenviron/gortsplib/v4 v4.3.0/go.mod h1:4XBcXsbK4MDFqnraexSDeKj++ZzrSd81CVplSpSNqKk=
 github.com/bluenviron/mediacommon v1.5.0 h1:lS0YKNo22ZOyCsYcLh3jn3TgUALqYw0f7RVwalC09vI=
 github.com/bluenviron/mediacommon v1.5.0/go.mod h1:Ij/kE1LEucSjryNBVTyPL/gBI0d6/Css3f5PyrM957w=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

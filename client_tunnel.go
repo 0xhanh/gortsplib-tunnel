@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"gortsplib-tunnel/conn"
 	"log"
 	"math/rand"
 	"net"
@@ -25,7 +26,6 @@ import (
 	"github.com/bluenviron/gortsplib/v4/pkg/rtptime"
 	"github.com/bluenviron/gortsplib/v4/pkg/sdp"
 	"github.com/bluenviron/gortsplib/v4/pkg/url"
-	"github.com/bluenviron/gortsplib/v4/tunnel/conn"
 )
 
 /*
@@ -382,19 +382,28 @@ type ClientTunnel struct {
 	//
 }
 
-func NewClientTunnel(tunnelOverPort uint) *ClientTunnel {
-	if tunnelOverPort == 0 {
+func NewClientTunnel(tunnelPort uint) *ClientTunnel {
+	if tunnelPort == 0 {
 		log.Println("invalid tunnel port")
 		return nil
 	}
 
-	log.Println("Rtsp Client will run in the RTSP-over-HTTP tunneling, tunnel port:", tunnelOverPort)
+	log.Println("Rtsp Client will run in the RTSP-over-HTTP tunneling, tunnel port:", tunnelPort)
 	// Note that tunneling RTSP (only) in HTTP would not be useful since the RTP data transported using UDP would be blocked.
 	v := TransportTCP
 	return &ClientTunnel{
-		tunnelOverPort: tunnelOverPort,
+		tunnelOverPort: tunnelPort,
 		Transport:      &v,
 	}
+}
+
+func (c *ClientTunnel) SetTunnelPort(tunnelPort uint) {
+	if tunnelPort == 0 {
+		log.Println("invalid tunnel port")
+		return
+	}
+
+	c.tunnelOverPort = tunnelPort
 }
 
 // Start initializes the connection to a server.
@@ -1250,7 +1259,6 @@ func (c *ClientTunnel) doPost(u *url.URL) (*base.Response, error) {
 
 func (c *ClientTunnel) doOptions(u *url.URL) (*base.Response, error) {
 	err := c.checkState(map[clientState]struct{}{
-		clientStateInitial:   {},
 		clientStagePost:      {},
 		clientStatePrePlay:   {},
 		clientStatePreRecord: {},
@@ -1302,7 +1310,6 @@ func (c *ClientTunnel) Options(u *url.URL) (*base.Response, error) {
 
 func (c *ClientTunnel) doDescribe(u *url.URL) (*description.Session, *base.Response, error) {
 	err := c.checkState(map[clientState]struct{}{
-		clientStateInitial:   {},
 		clientStagePost:      {},
 		clientStatePrePlay:   {},
 		clientStatePreRecord: {},
@@ -1392,9 +1399,8 @@ func (c *ClientTunnel) Describe(u *url.URL) (*description.Session, *base.Respons
 
 func (c *ClientTunnel) doAnnounce(u *url.URL, desc *description.Session) (*base.Response, error) {
 	err := c.checkState(map[clientState]struct{}{
-		clientStateInitial: {},
-		clientStagePost:    {},
-		clientStageDesc:    {},
+		clientStagePost: {},
+		clientStageDesc: {},
 	})
 	if err != nil {
 		return nil, err
@@ -1456,7 +1462,8 @@ func (c *ClientTunnel) doSetup(
 	rtcpPort int,
 ) (*base.Response, error) {
 	err := c.checkState(map[clientState]struct{}{
-		clientStateInitial:   {},
+		// clientStateInitial:   {},
+		clientStagePost:      {},
 		clientStageDesc:      {},
 		clientStatePrePlay:   {},
 		clientStatePreRecord: {},

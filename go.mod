@@ -20,4 +20,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
+// replace github.com/bluenviron/gortsplib/v4 v4.3.0 => github.com/0xhanh/gortsplib v0.0.0-20231101081823-e5ff82d994fc
+
 replace github.com/bluenviron/gortsplib/v4 v4.3.0 => /home/hanh/elcom/vms/bluenviron/gortsplib

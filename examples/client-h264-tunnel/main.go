@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
+	tunnel "gortsplib-tunnel"
 	"log"
 
 	"github.com/bluenviron/gortsplib/v4/pkg/format"
 	"github.com/bluenviron/gortsplib/v4/pkg/format/rtph264"
 	"github.com/bluenviron/gortsplib/v4/pkg/url"
-	"github.com/bluenviron/gortsplib/v4/tunnel"
 	"github.com/pion/rtp"
 )
 
@@ -22,10 +22,7 @@ import (
 func main() {
 
 	// parse URL
-	rtsp_url := "rtsp://localhost:8554/mystream"
-	rtsp_url = "rtsp://root:Elcom6789@hobao.ddns.net:8854/onvif-media/media.amp?profile=profile_1_h264&sessiontimeout=60&streamtype=unicast"
-	// rtsp_url = "rtsp://admin:Elcom@123@192.168.9.56:8112/profile2/media.smp?tunnelPort=8112" // tunnel
-	rtsp_url = "rtsp://admin:Elcom@123@192.168.9.56:8112/profile2/media.smp" // tunnel
+	rtsp_url := "rtsp://localhost:8554/mystream?tunnelPort=8112"
 
 	u, err := url.Parse(rtsp_url)
 	if err != nil {
@@ -33,9 +30,6 @@ func main() {
 	}
 
 	c := tunnel.NewClientTunnel(8112)
-	// v := tunnel.TransportTCP
-	// c.Transport = &v
-	// // tunnel
 	// c.SetTunnelOverPort(8112)
 
 	// connect to the server
@@ -55,13 +49,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	// find published medias
-	// resp, err = c.Options(u)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Printf("Options Resp: %+v", resp)
 
 	// find published medias
 	desc, _, err := c.Describe(u)

@@ -1,4 +1,4 @@
-package gortsplib-tunnel
+package tunnel
 
 import (
 	"github.com/bluenviron/gortsplib/v4/pkg/ringbuffer"

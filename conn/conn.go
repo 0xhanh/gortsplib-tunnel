@@ -4,7 +4,6 @@ package conn
 import (
 	"bufio"
 	"encoding/base64"
-	"fmt"
 	"io"
 
 	"github.com/bluenviron/gortsplib/v4/pkg/base"
@@ -47,7 +46,6 @@ func (c *Conn) Read() (interface{}, error) {
 		return c.ReadResponse()
 	}
 
-	// fmt.Println("Read() ReadRequest.... ")
 	return c.ReadRequest()
 }
 
@@ -73,8 +71,6 @@ func (c *Conn) ReadInterleavedFrame() (*base.InterleavedFrame, error) {
 
 // WriteRequest writes a request.
 func (c *Conn) WriteRequest(req *base.Request) error {
-	// hvd
-	fmt.Printf(">>> Request: %+v", req)
 	buf, _ := req.Marshal()
 	_, err := c.w.Write(buf)
 	return err
@@ -83,7 +79,7 @@ func (c *Conn) WriteRequest(req *base.Request) error {
 // tunnel:
 // WriteRequest writes a tunnel request.
 func (c *Conn) WriteTunnelRequest(req *base.Request) error {
-	fmt.Printf(">>> TunnelRequest: %+v", req)
+	// fmt.Printf(">>> TunnelRequest: %+v", req)
 
 	buf, _ := req.Marshal()
 	// When we're tunneling RTSP-over-HTTP, we Base-64-encode the request before we send it.
