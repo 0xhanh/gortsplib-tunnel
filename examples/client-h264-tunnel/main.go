@@ -22,7 +22,7 @@ import (
 func main() {
 
 	// parse URL
-	rtsp_url := "rtsp://localhost:8554/mystream?tunnelPort=8112"
+	rtsp_url := "rtsp://localhost:8554/mystream"
 
 	u, err := url.Parse(rtsp_url)
 	if err != nil {

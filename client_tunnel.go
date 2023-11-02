@@ -397,13 +397,12 @@ func NewClientTunnel(tunnelPort uint) *ClientTunnel {
 	}
 }
 
-func (c *ClientTunnel) SetTunnelPort(tunnelPort uint) {
+func (c *ClientTunnel) SetTunnelPort(tunnelPort uint) error {
 	if tunnelPort == 0 {
-		log.Println("invalid tunnel port")
-		return
+		return fmt.Errorf("invalid tunnel port")
 	}
-
 	c.tunnelOverPort = tunnelPort
+	return nil
 }
 
 // Start initializes the connection to a server.
