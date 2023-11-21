@@ -79,9 +79,10 @@ func (c *Conn) WriteRequest(req *base.Request) error {
 // tunnel:
 // WriteRequest writes a tunnel request.
 func (c *Conn) WriteTunnelRequest(req *base.Request) error {
-	// fmt.Printf(">>> TunnelRequest: %+v", req)
+	// fmt.Printf(">>>>> TunnelRequest: %+v", req)
 
 	buf, _ := req.Marshal()
+
 	// When we're tunneling RTSP-over-HTTP, we Base-64-encode the request before we send it.
 	// (However, we don't do this for the HTTP "GET" and "POST" commands that we use to set up the tunnel.)
 	if req.Method != base.Get && req.Method != base.Post {
