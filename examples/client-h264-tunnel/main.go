@@ -23,10 +23,6 @@ func main() {
 
 	// parse URL
 	rtsp_url := "rtsp://localhost:8554/mystream"
-	rtsp_url = "rtsp://root:Elcom6789@hobao.ddns.net:8854/onvif-media/media.amp?profile=profile_1_h264&sessiontimeout=60&streamtype=unicast"
-	// rtsp_url = "rtsp://admin:Elcom@123@192.168.9.56:8112/profile2/media.smp?tunnelPort=8112" // tunnel
-	// rtsp_url = "rtsp://admin:Elcom@123@192.168.9.56:8112/profile2/media.smp" // tunnel
-	rtsp_url = "rtsp://admin:dase@1357@27.72.105.164:8083/LiveChannel/0/media.smp" // tunnel
 
 	u, err := url.Parse(rtsp_url)
 	if err != nil {
