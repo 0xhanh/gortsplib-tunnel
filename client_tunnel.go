@@ -55,7 +55,7 @@ import (
 // * handle IPv6 with or without square brackets.
 // Adapted from net/http:
 // https://cs.opensource.google/go/go/+/refs/tags/go1.20.5:src/net/http/transport.go;l=2747
-func (c *ClientTunnel) canonicalAddr(u *url.URL) string {
+func (c *ClientTunnel) canonicalAddr(u *base.URL) string {
 	addr := u.Hostname()
 	port := u.Port()
 	if c.tunnelOverPort > 0 {
@@ -75,7 +75,7 @@ func isAnyPort(p int) bool {
 	return p == 0 || p == 1
 }
 
-func findBaseURL(sd *sdp.SessionDescription, res *base.Response, u *url.URL) (*url.URL, error) {
+func findBaseURL(sd *sdp.SessionDescription, res *base.Response, u *base.URL) (*base.URL, error) {
 	// use global control attribute
 	if control, ok := sd.Attribute("control"); ok && control != "*" {
 		ret, err := url.Parse(control)
@@ -166,32 +166,32 @@ func (s clientState) String() string {
 }
 
 type getReq struct {
-	url *url.URL
+	url *base.URL
 	res chan clientRes
 }
 
 type postReq struct {
-	url *url.URL
+	url *base.URL
 	res chan clientRes
 }
 type optionsReq struct {
-	url *url.URL
+	url *base.URL
 	res chan clientRes
 }
 
 type describeReq struct {
-	url *url.URL
+	url *base.URL
 	res chan clientRes
 }
 
 type announceReq struct {
-	url  *url.URL
+	url  *base.URL
 	desc *description.Session
 	res  chan clientRes
 }
 
 type setupReq struct {
-	baseURL  *url.URL
+	baseURL  *base.URL
 	media    *description.Media
 	rtpPort  int
 	rtcpPort int
@@ -327,7 +327,7 @@ type ClientTunnel struct {
 	receiverReportPeriod time.Duration
 	checkTimeoutPeriod   time.Duration
 
-	connURL              *url.URL
+	connURL              *base.URL
 	ctx                  context.Context
 	ctxCancel            func()
 	state                clientState
@@ -338,8 +338,8 @@ type ClientTunnel struct {
 	cseq                 int
 	optionsSent          bool
 	useGetParameter      bool
-	lastDescribeURL      *url.URL
-	baseURL              *url.URL
+	lastDescribeURL      *base.URL
+	baseURL              *base.URL
 	effectiveTransport   *Transport
 	medias               map[*description.Media]*clientMedia
 	tcpCallbackByChannel map[int]readFunc
@@ -498,7 +498,7 @@ func (c *ClientTunnel) Start(scheme string, host string) error {
 
 	ctx, ctxCancel := context.WithCancel(context.Background())
 
-	c.connURL = &url.URL{
+	c.connURL = &base.URL{
 		Scheme: scheme,
 		Host:   host,
 	}
@@ -529,7 +529,7 @@ func (c *ClientTunnel) Start(scheme string, host string) error {
 
 // StartRecording connects to the address and starts publishing given media.
 func (c *ClientTunnel) StartRecording(address string, desc *description.Session) error {
-	u, err := url.Parse(address)
+	u, err := base.ParseURL(address)
 	if err != nil {
 		return err
 	}
@@ -1141,7 +1141,7 @@ func genSessionCookie() string {
 
 // tunnel
 // sends an Get request.
-func (c *ClientTunnel) GET(u *url.URL) (*base.Response, error) {
+func (c *ClientTunnel) GET(u *base.URL) (*base.Response, error) {
 	if c.sessionCookie == "" {
 		c.sessionCookie = genSessionCookie()
 	}
@@ -1157,7 +1157,7 @@ func (c *ClientTunnel) GET(u *url.URL) (*base.Response, error) {
 	}
 }
 
-func (c *ClientTunnel) doGet(u *url.URL) (*base.Response, error) {
+func (c *ClientTunnel) doGet(u *base.URL) (*base.Response, error) {
 	err := c.checkState(map[clientState]struct{}{
 		clientStateInitial: {},
 	})
@@ -1204,7 +1204,7 @@ func (c *ClientTunnel) doGet(u *url.URL) (*base.Response, error) {
 
 // tunnel
 // sends an Post request.
-func (c *ClientTunnel) POST(u *url.URL) (*base.Response, error) {
+func (c *ClientTunnel) POST(u *base.URL) (*base.Response, error) {
 	cres := make(chan clientRes)
 	select {
 	case c.chPost <- postReq{url: u, res: cres}:
@@ -1216,7 +1216,7 @@ func (c *ClientTunnel) POST(u *url.URL) (*base.Response, error) {
 	}
 }
 
-func (c *ClientTunnel) doPost(u *url.URL) (*base.Response, error) {
+func (c *ClientTunnel) doPost(u *base.URL) (*base.Response, error) {
 	err := c.checkState(map[clientState]struct{}{
 		clientStageGet: {},
 	})
@@ -1256,7 +1256,7 @@ func (c *ClientTunnel) doPost(u *url.URL) (*base.Response, error) {
 	return res, nil
 }
 
-func (c *ClientTunnel) doOptions(u *url.URL) (*base.Response, error) {
+func (c *ClientTunnel) doOptions(u *base.URL) (*base.Response, error) {
 	err := c.checkState(map[clientState]struct{}{
 		clientStagePost:      {},
 		clientStatePrePlay:   {},
@@ -1295,7 +1295,7 @@ func (c *ClientTunnel) doOptions(u *url.URL) (*base.Response, error) {
 }
 
 // Options sends an OPTIONS request.
-func (c *ClientTunnel) Options(u *url.URL) (*base.Response, error) {
+func (c *ClientTunnel) Options(u *base.URL) (*base.Response, error) {
 	cres := make(chan clientRes)
 	select {
 	case c.chOptions <- optionsReq{url: u, res: cres}:
@@ -1307,7 +1307,7 @@ func (c *ClientTunnel) Options(u *url.URL) (*base.Response, error) {
 	}
 }
 
-func (c *ClientTunnel) doDescribe(u *url.URL) (*description.Session, *base.Response, error) {
+func (c *ClientTunnel) doDescribe(u *base.URL) (*description.Session, *base.Response, error) {
 	err := c.checkState(map[clientState]struct{}{
 		clientStagePost:      {},
 		clientStatePrePlay:   {},
@@ -1384,7 +1384,7 @@ func (c *ClientTunnel) doDescribe(u *url.URL) (*description.Session, *base.Respo
 }
 
 // Describe sends a DESCRIBE request.
-func (c *ClientTunnel) Describe(u *url.URL) (*description.Session, *base.Response, error) {
+func (c *ClientTunnel) Describe(u *base.URL) (*description.Session, *base.Response, error) {
 	cres := make(chan clientRes)
 	select {
 	case c.chDescribe <- describeReq{url: u, res: cres}:
@@ -1396,7 +1396,7 @@ func (c *ClientTunnel) Describe(u *url.URL) (*description.Session, *base.Respons
 	}
 }
 
-func (c *ClientTunnel) doAnnounce(u *url.URL, desc *description.Session) (*base.Response, error) {
+func (c *ClientTunnel) doAnnounce(u *base.URL, desc *description.Session) (*base.Response, error) {
 	err := c.checkState(map[clientState]struct{}{
 		clientStagePost: {},
 		clientStageDesc: {},
@@ -1442,7 +1442,7 @@ func (c *ClientTunnel) doAnnounce(u *url.URL, desc *description.Session) (*base.
 }
 
 // Announce sends an ANNOUNCE request.
-func (c *ClientTunnel) Announce(u *url.URL, desc *description.Session) (*base.Response, error) {
+func (c *ClientTunnel) Announce(u *base.URL, desc *description.Session) (*base.Response, error) {
 	cres := make(chan clientRes)
 	select {
 	case c.chAnnounce <- announceReq{url: u, desc: desc, res: cres}:
@@ -1455,7 +1455,7 @@ func (c *ClientTunnel) Announce(u *url.URL, desc *description.Session) (*base.Re
 }
 
 func (c *ClientTunnel) doSetup(
-	baseURL *url.URL,
+	baseURL *base.URL,
 	medi *description.Media,
 	rtpPort int,
 	rtcpPort int,
@@ -1758,7 +1758,7 @@ func (c *ClientTunnel) findFreeChannelPair() int {
 // rtpPort and rtcpPort are used only if transport is UDP.
 // if rtpPort and rtcpPort are zero, they are chosen automatically.
 func (c *ClientTunnel) Setup(
-	baseURL *url.URL,
+	baseURL *base.URL,
 	media *description.Media,
 	rtpPort int,
 	rtcpPort int,
@@ -1781,7 +1781,7 @@ func (c *ClientTunnel) Setup(
 }
 
 // SetupAll setups all the given medias.
-func (c *ClientTunnel) SetupAll(baseURL *url.URL, medias []*description.Media) error {
+func (c *ClientTunnel) SetupAll(baseURL *base.URL, medias []*description.Media) error {
 	for _, m := range medias {
 		_, err := c.Setup(baseURL, m, 0, 0)
 		if err != nil {
